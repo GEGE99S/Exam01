@@ -1,9 +1,8 @@
-package Exam01;
 
+package TestDay;
 import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-
 
 class PhoneInfoBook {
 
@@ -86,7 +85,7 @@ class Sqlc {
 
     void printAllEntity() {
         String insert;
-        insert = "select name, RPAD(substr(phoneNumber,1,4),8,'*' ) as phoneNumber, address from phone;";
+        insert = "select name, RPAD(substr(phoneNumber,1,4),8,'x' ) as phoneNumber, address from phone;";
         try {
             pstm = c.prepareStatement(insert);
 
@@ -115,22 +114,22 @@ class Sqlc {
         try {
             System.out.print("삭제할 이름을 입력해주세요! : ");
             String deleteName = scS.nextLine();
-
             pstm = c.prepareStatement(insert); // 입력받은 값 전송!
             pstm.setString(1, deleteName); //이름
-            boolean ox = pstm.execute(); //
-            if (!ox) {
-                System.out.println(deleteName + "의 정보가 정상적으로 삭제되었습니다!");
+            int i = pstm.executeUpdate(); //
+            if (i == 1) {
+                System.out.println(deleteName + "의 연락처가 삭제 되었습니다!");
             } else {
-                System.out.println("삭제할 " + deleteName + "정보가 없습니다! ");
+                System.out.println(deleteName+"의 연락처를 찾을 수 없습니다!.");
             }
-            System.out.println("======== 나머지 연락처 ========");
+            System.out.println("나머지 연락처");
             printAllEntity();
         } catch (SQLException e) {
             System.out.print("에러 내역 : ");
             e.fillInStackTrace();
         }
     }
+
     void searchName() {
         //select * from phone where name = '?';
         String insert;
@@ -164,7 +163,7 @@ class Sqlc {
     }
 }
 
-public class Exam01 {
+public class O {
     public static void main(String[] args) {
         int menu;
         PhoneInfoBook book = new PhoneInfoBook();
