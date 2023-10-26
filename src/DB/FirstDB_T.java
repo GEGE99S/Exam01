@@ -1,8 +1,9 @@
+/*
+
 package DB;
 
 import java.sql.*;
 import java.util.Scanner;
-
 
 class Data  // statement에 들어갈 변수들
 {
@@ -61,43 +62,67 @@ class Data  // statement에 들어갈 변수들
         this.moneyNum = moneyNum;
     }
 }
+
 class SQLC {//SQL 클래스에서 MySQL로 넘겨주도록  -> 연결//sql문 작성 필요
     private static Connection c; // DB에  쿼리 명령 실행할 객체
     //DriverManager : SQL Driver 연결을 위한 Manager
     //getConnection :DB에 연결시 객체를 제공 Connection
     private static PreparedStatement pstm; // 명령어 담는 객체
-
-    ResultSet rs  = null;
-    SQLC() throws SQLException {
+    ResultSet rs = null;
+      int columnCnt;
+    SQLC() throws SQLException, ClassNotFoundException {
+        Class.forName("com.mysql.cj.jdbc.Driver");
         c = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
     }
+    void getColumns() {
+        try {
+            String id = "root";
+            String pw = "1234";
+            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", id, pw);
+            String sql = "select * from 대리점";
+            pstm = c.prepareStatement(sql);
+            ResultSet rs = pstm.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData(); //컬럼 정보
+            columnCnt = rsmd.getColumnCount(); //컬럼의 수
+            for (int i = 1; i < columnCnt + 1; i++) {
+                System.out.print(rsmd.getColumnName(i) + "/");
+            }
+            System.out.println();
 
-
-    void DataDelete (Data D){
+            while (rs.next()) { //
+                for (int i = 1; i < columnCnt + 1; i++) {
+                    System.out.print(rs.getString(i) + "/");
+                }
+                System.out.println();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    void DataDelete(Data D) {
         try {
             Scanner sc = new Scanner(System.in);
             System.out.print("삭제할 지점명을 입력해주세요 : ");
             String name = sc.nextLine();
             ResultSet rs = pstm.getResultSet();
-            // 쿼리문을 세팅하는 작업
 
-            while (rs.next()){
-               if(rs.getString("지점명").equals(name)){
-                   pstm = c.prepareStatement("DELETE from 대리점 where 지점명 = (?);");
-                   pstm.setString(1, name); //지점명
-                   pstm.executeUpdate();
-                   break;
-               }else {
-                   System.out.println("삭제할 지점이 없습니다!");
-                   break;
-               }
+
+            while (rs.next()) {
+                if (rs.getString("지점명").equals(name)) {
+                    pstm = c.prepareStatement("DELETE from 대리점 where 지점명 = (?);");
+                    pstm.setString(1, name); //지점명
+                    pstm.executeUpdate();
+                    break;
+                } else {
+                    System.out.println("남은 테이블 정보가 없습니다!");
+                    break;
+                }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 
     void DataInsert(Data d) {
         try {
@@ -116,50 +141,62 @@ class SQLC {//SQL 클래스에서 MySQL로 넘겨주도록  -> 연결//sql문 �
         }
     }
 
-
     // 모든 결과문 추출
     void selectAll() throws SQLException {
         String sql = "select * from 대리점;";  // 쿼리문
         pstm = c.prepareStatement(sql); //
         rs = pstm.executeQuery();
-        while(rs.next()){
+        rs.getArray()
+            columnCnt
             String bName = rs.getString("지점명");
             String cityName = rs.getString("도시");
-            String phoneNum =  rs.getString("전화번호");
+            String phoneNum = rs.getString("전화번호");
             int workerNum = rs.getInt("종업원수");
             int money = rs.getInt("자본금");
-            java.sql.Date estaDate = rs.getDate("지점개설일"); // Retrieve the date as a java.sql.Date
+            java.sql.Date estaDate = rs.getDate("지점개설일");
             String formattedDate = estaDate.toString();
-            System.out.println(bName +" "+cityName+" "+phoneNum+" "+workerNum+" "+money+" "+formattedDate);
+            System.out.println(bName + " " + cityName + " " + phoneNum + " " + workerNum + " " + money + " " + formattedDate);
             System.out.println();
         }
     }
-
 
     void deleteData() throws SQLException {
         Scanner sc = new Scanner(System.in);
-        pstm = c.prepareStatement("Delete from 대리점 where 지점명 = (?);"); // 날릴 쿼리 담아놓고
+        pstm = c.prepareStatement("Delete from 대리점 where 지점명 = ?;"); // 날릴 쿼리 담아놓고
         System.out.println("삭제할 지점명을 입력하세요!");
         pstm.setString(1, sc.nextLine()); //지점명
-        rs = pstm.executeQuery(); // 쿼리 날린 결과 값을 받은 객체
-
-        while(rs.next()){ // 쿼리문을 받은 데이터  있다면
-            String bName = rs.getString("지점명");
-            String cityName = rs.getString("도시");
-            String phoneNum =  rs.getString("전화번호");
-            int workerNum = rs.getInt("종업원수");
-            int money = rs.getInt("자본금");
-            java.sql.Date estaDate = rs.getDate("지점개설일"); // Retrieve the date as a java.sql.Date
-            String formattedDate = estaDate.toString();
-            System.out.println(bName +" "+cityName+" "+phoneNum+" "+workerNum+" "+money+" "+formattedDate);
-            System.out.println();
+        boolean i = false;
+        i = pstm.execute();
+        if (i) {
+            System.out.println("삭제되었습니다!");
+        } else {
+            System.out.println("삭제할 파일이 없습니다!");
         }
-        System.out.println("실행 끝");
+        System.out.println("남은 정보");
+        selectAll();
+
     }
 
-
-
+    void serachBranch() throws SQLException {
+        Scanner sc = new Scanner(System.in);
+        pstm = c.prepareStatement("select * from 대리점 where 지점명 = ?;"); // 날릴 쿼리 담아놓고
+        System.out.println("검색할 지점명을 입력하세요!");
+        pstm.setString(1, sc.nextLine()); //지점명
+        rs = pstm.executeQuery();
+        while (rs.next()) {
+            String bName = rs.getString(1);
+            String cityName = rs.getString("도시");
+            String phoneNum = rs.getString("전화번호");
+            int workerNum = rs.getInt("종업원수");
+            int money = rs.getInt("자본금");
+            java.sql.Date estaDate = rs.getDate("지점개설일");
+            String formattedDate = estaDate.toString();
+            System.out.println(bName + " " + cityName + " " + phoneNum + " " + workerNum + " " + money + " " + formattedDate);
+            System.out.println();
+        }
+    }
 }
+
 class InputClass // 정보입력 받고  d 반환
 { //- Input 클래스에서 유저에게 입력받고,
     Data valueReturn() {
@@ -181,16 +218,10 @@ class InputClass // 정보입력 받고  d 반환
         d.setEstaDate(scI.nextInt());
         return d;
     }
-
 }
 
-
-
-
-
 public class FirstDB_T {
-    public static void main(String[] args) throws SQLException {
-
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
         Scanner sc = new Scanner(System.in);
         InputClass inputClass = new InputClass();
         SQLC sqlc = new SQLC();
@@ -203,16 +234,17 @@ public class FirstDB_T {
             } else if (num == 2) {
                 sqlc.selectAll();
             } else if (num == 3) {
-
+                sqlc.serachBranch();
             } else if (num == 4) {
                 sqlc.deleteData();
             } else if (num == 5) {
-
+                sqlc.getColumns();
                 break;
             } else {
                 System.out.println("잘못된 입력입니다.");
             }
         }
     }
-
 }
+
+*/
