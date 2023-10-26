@@ -51,7 +51,7 @@ class Sqlc {
             c = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
         } catch (SQLException e) {
             System.out.println(" 객체 생성 중 오류 발생! (JDBC,로컬주소,DB 로그인) 정보를 확인해주세요!");
-            e.printStackTrace();
+            e.fillInStackTrace();
 
         }
     }
@@ -79,7 +79,7 @@ class Sqlc {
             System.out.println("중복된 이름이 이미 존재합니다. 이름뒤에 구분자를 더 넣어 시도해주세요.");
         } catch (SQLException e) {
             System.out.print("에러 내역 : ");
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -105,7 +105,7 @@ class Sqlc {
             }
             System.out.println("============================");
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -128,7 +128,7 @@ class Sqlc {
             printAllEntity();
         } catch (SQLException e) {
             System.out.print("에러 내역 : ");
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -160,7 +160,7 @@ class Sqlc {
             System.out.println("============================");
         } catch (SQLException e) {
             System.out.print("에러 내역 : ");
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 }
