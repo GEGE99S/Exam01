@@ -1,11 +1,10 @@
-
 package TestDay;
+
 import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 class PhoneInfoBook {
-
     private String name;
     private String phoneNumber;
     private String address;
@@ -46,39 +45,56 @@ class Sqlc {
 
     Sqlc(PhoneInfoBook book) { //생성자
         this.book = book; // 외부 생성된 전화번호 부 동기화
-        try {
-            c = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", "root", "1234");
-        } catch (SQLException e) {
-            System.out.println(" 객체 생성 중 오류 발생! (JDBC,로컬주소,DB 로그인) 정보를 확인해주세요!");
-            e.fillInStackTrace();
-
+        while (true) {
+            System.out.println("로그인할 데이터 베이스 계정을 입력하세요!");
+            System.out.print(" ID : ");
+            String dbID = scS.nextLine();
+            System.out.println("로그인할 데이터 베이스 암호를 입력하세요!");
+            System.out.print(" PW : ");
+            String dbPW = scS.nextLine();
+            try {
+                c = DriverManager.getConnection("jdbc:mysql://localhost:3306/test", dbID, dbPW);
+                System.out.println("로그인 성공!");
+                break;
+            } catch (SQLException e) {
+                System.out.println(" * 에러내역 * " + e.getMessage());
+                System.out.println("로그인 실패! 접속 주소와 로그인 정보를 다시 확인 해주세요!");
+            }
         }
     }
 
     void insertEntity() {
         String insert = "insert into phone values (?,?,?);";
+        System.out.println("저장할 이름 입력해주세요");
+        book.setName(scI.nextLine());
+        System.out.println("폰번호 입력");
+        book.setPhoneNumber(scS.nextLine());
+        System.out.println("주소 입력");
+        book.setAddress(scS.nextLine());
         try {
-            System.out.println("저장할 이름 입력해주세요");
-            this.book.setName(scI.nextLine());
-            System.out.println("폰번호 입력");
-            this.book.setPhoneNumber(scS.nextLine());
-            System.out.println("주소 입력");
-            this.book.setAddress(scS.nextLine());
             pstm = c.prepareStatement(insert); // 입력받은 값 전송!
-            pstm.setString(1, this.book.getName()); //이름
-            pstm.setString(2, this.book.getPhoneNumber()); //폰번
-            pstm.setString(3, this.book.getAddress()); //주소
+            pstm.setString(1, book.getName()); //이름
+            pstm.setString(2, book.getPhoneNumber()); //폰번
+            pstm.setString(3, book.getAddress()); //주소
             int i = pstm.executeUpdate(); //
             if (i == 1) {
-                System.out.println(this.book.getName() + "의 연락처가 업데이트 되었습니다!");
+                System.out.println(book.getName() + "의 연락처가 업데이트 되었습니다!");
             } else {
                 System.out.println("업데이트 되지 않았습니다.");
             }
         } catch (SQLIntegrityConstraintViolationException e) {
             System.out.println("중복된 이름이 이미 존재합니다. 이름뒤에 구분자를 더 넣어 시도해주세요.");
         } catch (SQLException e) {
-            System.out.print("에러 내역 : ");
-            e.fillInStackTrace();
+
+            if (book.getName().length() > 8) {
+                System.out.println("이름은 8자를 초과할 수 없습니다!");
+            }
+            if (book.getAddress().length() > 45) {
+                System.out.println("주소는 45자를 초과할 수 없습니다!");
+            }
+            if (book.getPhoneNumber().length() > 45) {
+                System.out.println("전화번호는 45자를 초과할 수 없습니다! (-)포함.");
+            }
         }
     }
 
@@ -88,7 +104,6 @@ class Sqlc {
         insert = "select name, RPAD(substr(phoneNumber,1,4),8,'x' ) as phoneNumber, address from phone;";
         try {
             pstm = c.prepareStatement(insert);
-
             rs = pstm.executeQuery();
             boolean found = false;
             System.out.println("============================");
@@ -104,12 +119,12 @@ class Sqlc {
             }
             System.out.println("============================");
         } catch (SQLException e) {
-            e.fillInStackTrace();
+            System.out.println(" * 에러내역 * " + e.getMessage());
+
         }
     }
 
     void deleteRow() {
-        //delete from phone where name ='?' ; */
         String insert = "delete from phone where name =?;";
         try {
             System.out.print("삭제할 이름을 입력해주세요! : ");
@@ -120,13 +135,12 @@ class Sqlc {
             if (i == 1) {
                 System.out.println(deleteName + "의 연락처가 삭제 되었습니다!");
             } else {
-                System.out.println(deleteName+"의 연락처를 찾을 수 없습니다!.");
+                System.out.println(deleteName + "의 연락처를 찾을 수 없습니다!.");
             }
             System.out.println("나머지 연락처");
             printAllEntity();
         } catch (SQLException e) {
-            System.out.print("에러 내역 : ");
-            e.fillInStackTrace();
+            System.out.println(" * 에러내역 * " + e.getMessage());
         }
     }
 
@@ -134,15 +148,12 @@ class Sqlc {
         //select * from phone where name = '?';
         String insert;
         insert = "select name, RPAD(substr(phoneNumber,1,4),8,'x' ) as phoneNumber, address from phone where name = ?;";
-
         try {
             System.out.print("검색할 이름을 입력해주세요! : ");
             String search = scS.nextLine();
             pstm = c.prepareStatement(insert); // 입력받은 값 전송!
             pstm.setString(1, search); //이름
             rs = pstm.executeQuery();
-
-
             boolean found = false;
             System.out.println("============================");
             while (rs.next()) {
@@ -157,11 +168,12 @@ class Sqlc {
             }
             System.out.println("============================");
         } catch (SQLException e) {
-            System.out.print("에러 내역 : ");
-            e.fillInStackTrace();
+
+            System.out.println(" * 에러내역 * " + e.getMessage());
         }
     }
 }
+
 
 public class O {
     public static void main(String[] args) {
@@ -188,6 +200,7 @@ public class O {
                     System.out.println("잘못된 메뉴선택입니다. 다시 입력해주세요!");
                 }
             } catch (InputMismatchException e) {
+                System.out.println(" * 에러내역 * " + e.getMessage());
                 System.out.println("숫자만 입력해주세요!");
             }
         }
