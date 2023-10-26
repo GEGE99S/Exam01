@@ -56,7 +56,7 @@ class Sqlc {
         }
     }
 
-    void insertEntity(PhoneInfoBook book) {
+    void insertEntity() {
         String insert = "insert into phone values (?,?,?);";
         try {
             System.out.println("저장할 이름 입력해주세요");
@@ -176,7 +176,7 @@ public class Exam01 {
                 Scanner sc = new Scanner(System.in);
                 menu = sc.nextInt();
                 if (menu == 1) {
-                    app.insertEntity(app.book);
+                    app.insertEntity();
                 } else if (menu == 2) {
                     app.searchName();
                 } else if (menu == 3) {
