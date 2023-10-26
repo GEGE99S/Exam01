@@ -131,7 +131,6 @@ class Sqlc {
             e.fillInStackTrace();
         }
     }
-
     void searchName() {
         //select * from phone where name = '?';
         String insert;
