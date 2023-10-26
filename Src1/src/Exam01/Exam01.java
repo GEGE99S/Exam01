@@ -1,8 +1,9 @@
+package Exam01;
 
-package TestDay;
 import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+
 
 class PhoneInfoBook {
 
@@ -134,7 +135,7 @@ class Sqlc {
     void searchName() {
         //select * from phone where name = '?';
         String insert;
-        insert = "select name, RPAD(substr(phoneNumber,1,4),8,'*' ) as phoneNumber, address from phone where name = ?;";
+        insert = "select name, RPAD(substr(phoneNumber,1,4),8,'x' ) as phoneNumber, address from phone where name = ?;";
 
         try {
             System.out.print("검색할 이름을 입력해주세요! : ");
@@ -164,7 +165,7 @@ class Sqlc {
     }
 }
 
-public class O {
+public class Exam01 {
     public static void main(String[] args) {
         int menu;
         PhoneInfoBook book = new PhoneInfoBook();
